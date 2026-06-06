@@ -2,13 +2,13 @@ import { StatusBar } from "expo-status-bar";
 import { useMemo, useState } from "react";
 import {
   Linking,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import {
   buildThreeHourSlots,
@@ -16,6 +16,7 @@ import {
   getVenueStatus,
   venues,
 } from "./src/domain/dining";
+import { useLiveNow } from "./src/hooks/useLiveNow";
 
 type Tab = "nearby" | "timeline" | "about";
 
@@ -32,13 +33,21 @@ const colors = {
 };
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <PentagonEats />
+    </SafeAreaProvider>
+  );
+}
+
+function PentagonEats() {
   const [tab, setTab] = useState<Tab>("nearby");
-  const now = useMemo(() => new Date(), []);
+  const now = useLiveNow();
   const slots = useMemo(() => buildThreeHourSlots(now, 6), [now]);
   const openCount = getOpenVenues(venues, now).length;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={["top", "right", "bottom", "left"]} style={styles.safe}>
       <StatusBar style="dark" />
       <View style={styles.shell}>
         <View style={styles.header}>
@@ -107,6 +116,7 @@ export default function App() {
                         <Text style={styles.location}>{venue.location}</Text>
                       </View>
                       <TouchableOpacity
+                        accessibilityLabel={`Open official information for ${venue.name}`}
                         accessibilityRole="link"
                         onPress={() => Linking.openURL(venue.url)}
                         style={styles.linkButton}
@@ -126,8 +136,8 @@ export default function App() {
                 <Text style={styles.heroKicker}>THREE-HOUR PLANNER</Text>
                 <Text style={styles.timelineTitle}>Choose by time of day</Text>
                 <Text style={styles.timelineBody}>
-                  See which listed restaurants are expected to be open in each
-                  three-hour window, based on published business hours.
+                  See which listed restaurants are expected to be open at each
+                  three-hour checkpoint, based on published business hours.
                 </Text>
               </View>
               {slots.map((slot) => {
