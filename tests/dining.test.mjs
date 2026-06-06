@@ -9,17 +9,30 @@ import {
   venues,
 } from "../src/domain/dining.js";
 
+const venueById = (id) => venues.find((venue) => venue.id === id);
+
 test("Wiseguy is open during a Friday dinner", () => {
   const fridayDinner = new Date("2026-06-06T00:00:00Z");
-  const wiseguy = venues.find((venue) => venue.id === "wiseguy-pizza");
-  assert.equal(isVenueOpen(wiseguy, fridayDinner), true);
+  assert.equal(isVenueOpen(venueById("wiseguy-pizza"), fridayDinner), true);
 });
 
 test("Chick-fil-A is closed on Sunday", () => {
   const sundayNoon = new Date("2026-06-07T16:00:00Z");
-  const venue = venues.find((item) => item.id === "chick-fil-a");
+  const venue = venueById("chick-fil-a");
   assert.equal(isVenueOpen(venue, sundayNoon), false);
   assert.equal(getVenueStatus(venue, sundayNoon).label, "Closed Sunday");
+});
+
+test("a venue opens at the exact published opening time", () => {
+  const mondayAtEleven = new Date("2026-06-08T15:00:00Z");
+  assert.equal(isVenueOpen(venueById("wiseguy-pizza"), mondayAtEleven), true);
+});
+
+test("a venue closes at the exact published closing time", () => {
+  const mondayAtNine = new Date("2026-06-09T01:00:00Z");
+  const venue = venueById("wiseguy-pizza");
+  assert.equal(isVenueOpen(venue, mondayAtNine), false);
+  assert.equal(getVenueStatus(venue, mondayAtNine).label, "Closed today");
 });
 
 test("open venue list reflects public opening hours", () => {
@@ -30,7 +43,7 @@ test("open venue list reflects public opening hours", () => {
   assert.ok(!open.includes("wiseguy-pizza"));
 });
 
-test("planner creates three-hour slots", () => {
+test("planner creates three-hour checkpoints", () => {
   const slots = buildThreeHourSlots(new Date("2026-06-08T12:20:00Z"), 4);
   assert.equal(slots.length, 4);
   assert.equal(slots[1].at.getTime() - slots[0].at.getTime(), 3 * 60 * 60 * 1000);
