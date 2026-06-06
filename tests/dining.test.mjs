@@ -23,6 +23,14 @@ test("Chick-fil-A is closed on Sunday", () => {
   assert.equal(getVenueStatus(venue, sundayNoon).label, "Closed Sunday");
 });
 
+test("Marketplace Cafe follows its published Sunday hours", () => {
+  const sundayNoon = new Date("2026-06-07T16:00:00Z");
+  const sundayClosing = new Date("2026-06-07T21:00:00Z");
+  const venue = venueById("marketplace-cafe");
+  assert.equal(isVenueOpen(venue, sundayNoon), true);
+  assert.equal(isVenueOpen(venue, sundayClosing), false);
+});
+
 test("a venue opens at the exact published opening time", () => {
   const mondayAtEleven = new Date("2026-06-08T15:00:00Z");
   assert.equal(isVenueOpen(venueById("wiseguy-pizza"), mondayAtEleven), true);
